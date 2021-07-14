@@ -1,11 +1,12 @@
 import pygame
 import numpy as np
+import math
 
 from nn import NeuralNetwork
 from config import CONFIG
 
 
-class Player():
+class Player:
 
     def __init__(self, mode, control=False):
 
@@ -97,7 +98,6 @@ class Player():
             layer_sizes = [6, 20, 1]
         return layer_sizes
 
-    
     def think(self, mode, box_lists, agent_position, velocity):
 
         # TODO
@@ -105,9 +105,46 @@ class Player():
         # box_lists: an array of `BoxList` objects
         # agent_position example: [600, 250]
         # velocity example: 7
+        # if mode == 'helicopter':
+        #     mode_num = 1
+        # elif mode == 'thrust':
+        #     mode_num = 2
+        # else:
+        #     mode_num = 3
 
-        direction = -1
-        return direction
+        if len(box_lists):  # there is at least one box in screen
+            target_position = np.array([box_lists[0].x, box_lists[0].gap_mid])
+        else:  # there is no box in the screen
+            target_position = np.array([CONFIG['WIDTH'], CONFIG['HEIGHT'] / 2])
+        gap = 120
+
+        distance_from_top = CONFIG['HEIGHT'] - agent_position[1]
+        distance_from_bottom = agent_position[1]
+
+        distance_from_boxes_top = abs(agent_position[1] - (target_position[1] - gap))
+        distance_from_boxes_bottom = abs(agent_position[1] + (target_position[1] - gap))
+
+        diagonal_distanse = np.linalg.norm(agent_position - target_position)
+        diagonal_distanse = math.sqrt((agent_position[0] - target_position[0])**2 +
+                                      (agent_position[1] - target_position[1])**2)
+
+        nn_input = np.array([[velocity],
+                             [diagonal_distanse],
+                             [distance_from_top],
+                             [distance_from_bottom],
+                             [distance_from_boxes_top],
+                             [distance_from_boxes_bottom]])
+
+        # normalizing input
+        nn_input = nn_input / np.max(nn_input)
+
+        # calculating output
+        res = self.nn.forward(nn_input)  # 0 < res < 1
+
+        # finding direction
+        res -= .5  # -0.5 < res < 0.5
+        direction = res / np.abs(res)  # direction = [[1.]] or [[-1.]]
+        return int(direction[0])
 
     def collision_detection(self, mode, box_lists, camera):
         if mode == 'helicopter':

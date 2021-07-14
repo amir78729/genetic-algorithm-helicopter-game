@@ -1,3 +1,5 @@
+import copy
+
 from player import Player
 import numpy as np
 from config import CONFIG
@@ -35,7 +37,16 @@ class Evolution():
             # TODO (additional): a selection method other than `fitness proportionate`
             # TODO (additional): implementing crossover
 
-            new_players = prev_players
+            new_players = []
+            count = 0
+            while count < num_players:
+                p = self.roulette_wheel(prev_players)
+                child = copy.deepcopy(p)
+                self.mutate(child)
+                new_players.append(child)
+                count += 1
+                print(child.fitness, end=" ")
+
             return new_players
 
     def next_population_selection(self, players, num_players):
@@ -43,8 +54,18 @@ class Evolution():
         # TODO
         # num_players example: 100
         # players: an array of `Player` objects
+        players = sorted(players, key=lambda x: x.fitness)[::-1]
 
         # TODO (additional): a selection method other than `top-k`
         # TODO (additional): plotting
 
         return players[: num_players]
+
+    def roulette_wheel(self, chromosomes):
+        max = sum([c.fitness for c in chromosomes])
+        pick = np.random.uniform(0, max)
+        current = 0
+        for chromosome in chromosomes:
+            current += chromosome.fitness
+            if current > pick:
+                return chromosome
