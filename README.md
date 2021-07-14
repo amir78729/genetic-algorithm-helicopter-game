@@ -1,2 +1,2 @@
 # genetic-algorithm-helicopter-game
- 3rd Project for Principle of Computational Intelligence Course
+> Computer Eng. Dept., Amirkabir University of Tech.
