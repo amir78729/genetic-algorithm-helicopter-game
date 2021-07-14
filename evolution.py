@@ -1,5 +1,5 @@
 import copy
-
+import random
 from player import Player
 import numpy as np
 from config import CONFIG
@@ -63,7 +63,7 @@ class Evolution():
 
     def roulette_wheel(self, chromosomes):
         max = sum([c.fitness for c in chromosomes])
-        pick = np.random.uniform(0, max)
+        pick = random.uniform(0, max)
         current = 0
         for chromosome in chromosomes:
             current += chromosome.fitness

@@ -9,12 +9,13 @@ class NeuralNetwork:
 
         # weights
         w1 = np.random.randn(layer_sizes[1], layer_sizes[0])
+        self.hidden_layer = np.zeros((layer_sizes[1], 1))
         w2 = np.random.randn(layer_sizes[2], layer_sizes[1])
         self.weights = [w1, w2]
 
         # biases
-        b1 = np.random.random((layer_sizes[1], layer_sizes[0]))
-        b2 = np.random.random((layer_sizes[2], layer_sizes[1]))
+        b1 = np.random.randn(layer_sizes[2], 1)
+        b2 = np.random.randn(layer_sizes[2], 1)
         self.biases = [b1, b2]
 
     def activation(self, x):
@@ -23,9 +24,9 @@ class NeuralNetwork:
     def forward(self, x):
         # x example: np.array([[0.1], [0.2], [0.3]])
         z1 = (self.weights[0] @ x) + self.biases[0]
-        a1 = np.asarray([self.activation(z[0]) for z in z1]).reshape((self.layer_sizes[1], 1))
+        a1 = self.activation(z1)
         z2 = (self.weights[1] @ a1) + self.biases[1]
-        a2 = np.asarray([self.activation(z[0]) for z in z2]).reshape((self.layer_sizes[2], 1))
+        a2 = self.activation(z2)
         return a2
 
 

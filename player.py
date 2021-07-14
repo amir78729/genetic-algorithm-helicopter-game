@@ -121,12 +121,12 @@ class Player:
         distance_from_top = CONFIG['HEIGHT'] - agent_position[1]
         distance_from_bottom = agent_position[1]
 
-        distance_from_boxes_top = abs(agent_position[1] - (target_position[1] - gap))
-        distance_from_boxes_bottom = abs(agent_position[1] + (target_position[1] - gap))
+        distance_from_boxes_top = abs(agent_position[1] - target_position[1] - gap)
+        distance_from_boxes_bottom = abs(agent_position[1] - target_position[1] + gap)
 
         diagonal_distanse = np.linalg.norm(agent_position - target_position)
-        diagonal_distanse = math.sqrt((agent_position[0] - target_position[0])**2 +
-                                      (agent_position[1] - target_position[1])**2)
+        # diagonal_distanse = math.sqrt((agent_position[0] - target_position[0])**2 +
+        #                               (agent_position[1] - target_position[1])**2)
 
         nn_input = np.array([[velocity],
                              [diagonal_distanse],
