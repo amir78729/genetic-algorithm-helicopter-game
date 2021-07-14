@@ -38,7 +38,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-class Game():
+class Game:
 
     def __init__(self):  # class initializer
 
@@ -227,7 +227,7 @@ class Game():
                     color = (0, 0, 0)
                 elif mode == 'gravity':
                     color = (255, 255, 255)
-                elif mode == 'thrust':
+                else:
                     color = (0, 0, 0)
 
                 # rendering stats
@@ -321,7 +321,7 @@ class Game():
                 color = (0, 0, 0)
             elif mode == 'gravity':
                 color = (255, 255, 255)
-            elif mode == 'thrust':
+            else:
                 color = (255, 255, 255)
 
             # rendering stats
@@ -331,7 +331,6 @@ class Game():
                 self.screen.blit(self.speed_font.render(f'{str(1000 // dt)}', -1, color), (1200, 650))
             
             pygame.display.update()
-
 
     def load_images(self, mode):
         background = pygame.image.load(f'sprites/back_{mode}.jpg').convert()
@@ -350,7 +349,7 @@ class Game():
             agent = pygame.image.load('sprites/ball_gravity.png').convert_alpha()
             agent = pygame.transform.scale(agent, (80, 80))
 
-        elif mode == 'thrust':
+        else:
             agent = pygame.image.load('sprites/ball_thrust.png').convert_alpha()
             agent = pygame.transform.scale(agent, (140, 80))
 
