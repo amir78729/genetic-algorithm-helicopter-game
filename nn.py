@@ -9,7 +9,6 @@ class NeuralNetwork:
 
         # weights
         w1 = np.random.randn(layer_sizes[1], layer_sizes[0])
-        self.hidden_layer = np.zeros((layer_sizes[1], 1))
         w2 = np.random.randn(layer_sizes[2], layer_sizes[1])
         self.weights = [w1, w2]
 
