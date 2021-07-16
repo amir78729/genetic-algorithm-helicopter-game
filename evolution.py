@@ -28,7 +28,6 @@ class Evolution():
         self.mutate_array(child.nn.weights[1], mutation_prob, mutation_std, r)
         self.mutate_array(child.nn.biases[1], mutation_prob, mutation_std, r)
 
-
     def generate_new_population(self, num_players, prev_players=None):
 
         # in first generation, we create random players
@@ -41,20 +40,26 @@ class Evolution():
             # num_players example: 150
             # prev_players: an array of `Player` objects
 
-            # TODO (additional): a selection method other than `fitness proportionate`
-            # TODO (additional): implementing crossover
-
             new_players = []
-            count = 0
-            while count < num_players:
+            for i in range(num_players):
                 p = self.roulette_wheel(prev_players)
                 child = copy.deepcopy(p)
                 self.mutate(child)
                 new_players.append(child)
-                count += 1
-                print(child.fitness, end=" ")
+            # count = 0
+            # while count < num_players:
+            #     p = self.roulette_wheel(prev_players)
+            #     child = copy.deepcopy(p)
+            #     self.mutate(child)
+            #     new_players.append(child)
+            #     count += 1
+                # print(child.fitness, end=" ")
 
             return new_players
+            # TODO (additional): a selection method other than `fitness proportionate`
+            # TODO (additional): implementing crossover
+
+
 
     def next_population_selection(self, players, num_players):
 
