@@ -1,11 +1,12 @@
 from player import Player
 import numpy as np
+from config import CONFIG
 import random
 import copy
-from game import selection_method
+import csv
 
 
-class Evolution():
+class Evolution:
 
     def __init__(self, mode):
         self.mode = mode
@@ -65,61 +66,70 @@ class Evolution():
         return selected_players
 
     def generate_new_population(self, num_players, prev_players=None):
+        print('Generating New Population')
         # in first generation, we create random players
         if prev_players is None:
             return [Player(self.mode) for _ in range(num_players)]
 
+
         else:
             # num_players example: 150
             # prev_players: an array of `Player` objects
-            if selection_method == 'simple':
-                # simple way
-                prob = [x.fitness for x in prev_players]
-                max_p = sum(prob)
-                prob = [p / max_p for p in prob]
-                # print(prob)
-                res = np.random.choice(prev_players, num_players, p=prob, replace=False)
-                new_players = []
-                for p in res:
-                    child = copy.deepcopy(p)
-                    self.mutate(child)
-                    new_players.append(child)
-                return res.tolist()
+
+            # # simple method
+            # prob = [x.fitness for x in prev_players]
+            # max_p = sum(prob)
+            # prob = [p / max_p for p in prob]
+            # res = np.random.choice(prev_players, num_players, p=prob, replace=False)
+            # new_players = []
+            # for p in res:
+            #     child = copy.deepcopy(p)
+            #     self.mutate(child)
+            #     new_players.append(child)
+            # return res.tolist()
 
             # TODO (additional): a selection method other than `fitness proportionate`
-            if selection_method == 'roulette wheel':
-                # roulette wheel method
-                new_players = []
-                for count in range(num_players):
-                    # selecting a player
-                    p = self.roulette_wheel(prev_players)
 
-                    # copy the child
-                    child = copy.deepcopy(p)
+            # roulette wheel method
+            new_players = []
+            count = 0
+            while count < num_players:
+                p = self.roulette_wheel(prev_players)
+                child = copy.deepcopy(p)
+                self.mutate(child)
+                new_players.append(child)
+                count += 1
+            return new_players
 
-                    # mutate the child
-                    self.mutate(child)
-                    new_players.append(child)
-                return new_players
-
-            if selection_method == 'sus':
-                # sus method
-                new_players = []
-                candidates = self.sus(prev_players, num_players)
-                for c in candidates:
-                    child = copy.deepcopy(c)
-                    self.mutate(child)
-                    new_players.append(child)
-                return new_players
+            # # sus method
+            # new_players = []
+            # candidates = self.sus(prev_players, num_players)
+            # for c in candidates:
+            #     child = copy.deepcopy(c)
+            #     self.mutate(child)
+            #     new_players.append(child)
+            # return new_players
 
             # TODO (additional): implementing crossover
+
 
 
     def next_population_selection(self, players, num_players):
         # num_players example: 100
         # players: an array of `Player` objects
         players.sort(key=lambda x: x.fitness, reverse=True)
+
         # TODO (additional): a selection method other than `top-k`
+
         # TODO (additional): plotting
+        fitnesses = np.array([x.fitness for x in players])
+        max_fitness = np.max(fitnesses)
+        min_fitness = np.min(fitnesses)
+        avg_fitness = round(np.average(fitnesses))
+        print(' - max: {}\n - min: {}\n - avg: {}'.format(max_fitness, min_fitness, avg_fitness))
+        # writing statistic data on a csv file
+        with open(r'fitness_data_for_plotting.csv', 'a') as f:
+            writer = csv.writer(f, lineterminator='\n')
+            writer.writerow([min_fitness, avg_fitness, max_fitness])
         return players[: num_players]
 

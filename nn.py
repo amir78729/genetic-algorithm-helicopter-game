@@ -30,6 +30,6 @@ class NeuralNetwork():
         # x example: np.array([[0.1], [0.2], [0.3]])
 
 
-# n = NeuralNetwork([6, 20, 1])
-# n.forward(np.array([[0.1], [0.2], [0.3], [0.4], [0.7], [0.8]]))
-# print(n.output_layer)
+n = NeuralNetwork([6, 20, 1])
+n.forward(np.array([[0.1], [0.2], [0.3], [0.4], [0.7], [0.8]]))
+print(n.output_layer)
