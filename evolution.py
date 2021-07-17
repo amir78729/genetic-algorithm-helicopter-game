@@ -46,14 +46,6 @@ class Evolution():
                 child = copy.deepcopy(p)
                 self.mutate(child)
                 new_players.append(child)
-            # count = 0
-            # while count < num_players:
-            #     p = self.roulette_wheel(prev_players)
-            #     child = copy.deepcopy(p)
-            #     self.mutate(child)
-            #     new_players.append(child)
-            #     count += 1
-                # print(child.fitness, end=" ")
 
             return new_players
             # TODO (additional): a selection method other than `fitness proportionate`
@@ -80,14 +72,13 @@ class Evolution():
 
         # writing statistic data on a csv file
         with open(r'fitness_data_for_plotting.csv', 'a') as f:
-            writer = csv.writer(f)
+            writer = csv.writer(f, lineterminator='\n')
             writer.writerow([min_fitness, avg_fitness, max_fitness])
 
         return players[: num_players]
 
     def roulette_wheel(self, chromosomes):
-        max = sum([c.fitness for c in chromosomes])
-        pick = random.uniform(0, max)
+        pick = random.uniform(0, sum([c.fitness for c in chromosomes]))
         current = 0
         for chromosome in chromosomes:
             current += chromosome.fitness

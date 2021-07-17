@@ -368,6 +368,12 @@ class Game:
 
 
 if __name__ == '__main__':
+
+    # clearing the csv file
+    f = open("fitness_data_for_plotting.csv", "w")
+    f.truncate()
+    f.close()
+
     is_play = True if args.play == 'True' else False 
     if is_play:
         Game().play(args.mode)
