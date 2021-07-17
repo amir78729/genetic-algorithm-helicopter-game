@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
+from game import selection_method
 
-plt.style.use('dark_background')
 
-if __name__ == '__main__':
+def plot_fitness():
+    plt.style.use('dark_background')
     rows = []
     # reading from file
     with open('fitness_data_for_plotting.csv', 'r') as csv_file:
@@ -37,7 +38,8 @@ if __name__ == '__main__':
         plt.legend()
         plt.xlabel('GENERATION')
         plt.ylabel('FITNESS')
-        plt.title('Fitness of Different Generations')
+        plt.title('Fitness of Different Generations\n'
+                  'Selection Method: {}'.format(selection_method))
         plt.show()
     except IndexError:
         print('csv file is empty!')

@@ -5,9 +5,10 @@ import argparse
 
 from player import Player
 from box_list import BoxList
-from evolution import Evolution
 from config import CONFIG
 from util import save_generation, load_generation
+from evolution import Evolution
+from plotting_fitnesses import plot_fitness
 
 # argument parser
 parser = argparse.ArgumentParser(
@@ -38,7 +39,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-class Game:
+class Game():
 
     def __init__(self):  # class initializer
 
@@ -227,7 +228,7 @@ class Game:
                     color = (0, 0, 0)
                 elif mode == 'gravity':
                     color = (255, 255, 255)
-                else:
+                elif mode == 'thrust':
                     color = (0, 0, 0)
 
                 # rendering stats
@@ -321,7 +322,7 @@ class Game:
                 color = (0, 0, 0)
             elif mode == 'gravity':
                 color = (255, 255, 255)
-            else:
+            elif mode == 'thrust':
                 color = (255, 255, 255)
 
             # rendering stats
@@ -331,6 +332,7 @@ class Game:
                 self.screen.blit(self.speed_font.render(f'{str(1000 // dt)}', -1, color), (1200, 650))
             
             pygame.display.update()
+
 
     def load_images(self, mode):
         background = pygame.image.load(f'sprites/back_{mode}.jpg').convert()
@@ -349,7 +351,7 @@ class Game:
             agent = pygame.image.load('sprites/ball_gravity.png').convert_alpha()
             agent = pygame.transform.scale(agent, (80, 80))
 
-        else:
+        elif mode == 'thrust':
             agent = pygame.image.load('sprites/ball_thrust.png').convert_alpha()
             agent = pygame.transform.scale(agent, (140, 80))
 
@@ -369,13 +371,18 @@ class Game:
 
 if __name__ == '__main__':
 
+    # selection_methods = ['simple', 'roulette wheel', 'sus']
+    # selection_method = selection_methods[0]
+
     # clearing the csv file
-    f = open("fitness_data_for_plotting.csv", "w")
-    f.truncate()
-    f.close()
+    # f = open("fitness_data_for_plotting.csv", "w")
+    # f.truncate()
+    # f.close()
 
     is_play = True if args.play == 'True' else False 
     if is_play:
         Game().play(args.mode)
     else:
         Game().run(args.mode, args.checkpoint)
+
+    # plot_fitness()

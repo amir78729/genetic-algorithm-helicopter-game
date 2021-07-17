@@ -1,12 +1,11 @@
 import pygame
 import numpy as np
-import math
 
 from nn import NeuralNetwork
 from config import CONFIG
 
 
-class Player:
+class Player():
 
     def __init__(self, mode, control=False):
 
@@ -16,6 +15,7 @@ class Player:
         self.v = 0              # vertical velocity
         self.g = 9.8            # gravity constant
         self.mode = mode        # game mode
+
 
         # neural network architecture (AI mode)
         layer_sizes = self.init_network(mode)
@@ -99,52 +99,65 @@ class Player:
         return layer_sizes
 
     def think(self, mode, box_lists, agent_position, velocity):
+        # if len(box_lists):
+        #     x_b = box_lists[0].x
+        #     y_b = box_lists[0].gap_mid
+        #     up = y_b + box_lists[0].gap_offset
+        #     down = y_b + box_lists[0].gap_offset
+        # else:
+        #     x_b = CONFIG['WIDTH']
+        #     y_b = CONFIG['HEIGHT'] / 2
+        #     up = y_b + 30
+        #     down = y_b - 30
+        # x1 = agent_position[0] - x_b
+        # y1 = agent_position[1] - y_b
+        # 
+        # x2 = agent_position[0] - down
+        # y2 = agent_position[1] - up
+        # y = ((agent_position[0] - x_b) ** 2 + (agent_position[1] - y_b) ** 2) ** 0.5
+        # vector = [y2, y1, y, x2, x1, velocity]
+        # input_layer = [abs(i) for i in vector]
+        # m = max(input_layer)
+        # # input_layer = [i/m for i in input_layer]
+        # # print(input_layer)
+        # self.nn.forward(input_layer)
+        # 
+        # if self.nn.output_layer[0][0] > 0.5:
+        #     direction = 1
+        # else:
+        #     direction = -1
 
+        if len(box_lists):
+            x_b = box_lists[0].x
+            y_b = box_lists[0].gap_mid
+            dist = 120
+        else:
+            x_b = CONFIG['WIDTH']
+            y_b = CONFIG['HEIGHT'] / 2
+            dist = 120
+
+        dist_up = CONFIG['HEIGHT'] - agent_position[1]
+        dist_down = agent_position[1]
+        up_gap = abs(agent_position[1] - dist - y_b)
+        down_gap = abs(agent_position[1] + dist - y_b)
+        edist = ((agent_position[0] - x_b) ** 2 + (agent_position[1] - y_b) ** 2) ** 0.5
+
+        vector = [dist_up/1000, up_gap/1000, edist/1000, down_gap/1000, dist_down/1000, velocity/10]
+
+        self.nn.forward(vector)
+
+        if self.nn.output_layer[0][0] > 0.5:
+            direction = 1
+        else:
+            direction = -1
         # TODO
         # mode example: 'helicopter'
         # box_lists: an array of `BoxList` objects
         # agent_position example: [600, 250]
         # velocity example: 7
-        # if mode == 'helicopter':
-        #     mode_num = 1
-        # elif mode == 'thrust':
-        #     mode_num = 2
-        # else:
-        #     mode_num = 3
 
-        if len(box_lists):  # there is at least one box in screen
-            target_position = np.array([box_lists[0].x, box_lists[0].gap_mid])
-        else:  # there is no box in the screen
-            target_position = np.array([CONFIG['WIDTH'], CONFIG['HEIGHT'] / 2])
-        gap = 120
-
-        distance_from_top = CONFIG['HEIGHT'] - agent_position[1]
-        distance_from_bottom = agent_position[1]
-
-        distance_from_boxes_top = abs(agent_position[1] - target_position[1] - gap)
-        distance_from_boxes_bottom = abs(agent_position[1] - target_position[1] + gap)
-
-        diagonal_distanse = np.linalg.norm(agent_position - target_position)
-        # diagonal_distanse = math.sqrt((agent_position[0] - target_position[0])**2 +
-        #                               (agent_position[1] - target_position[1])**2)
-
-        nn_input = np.array([[velocity],
-                             [diagonal_distanse],
-                             [distance_from_top],
-                             [distance_from_bottom],
-                             [distance_from_boxes_top],
-                             [distance_from_boxes_bottom]])
-
-        # normalizing input
-        nn_input = nn_input / np.max(nn_input)
-
-        # calculating output
-        res = self.nn.forward(nn_input)  # 0 < res < 1
-
-        # finding direction
-        res -= .5  # -0.5 < res < 0.5
-        direction = res / np.abs(res)  # direction = [[1.]] or [[-1.]]
-        return int(direction[0])
+        # direction = -1
+        return direction
 
     def collision_detection(self, mode, box_lists, camera):
         if mode == 'helicopter':

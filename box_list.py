@@ -1,7 +1,6 @@
 from config import CONFIG
 
-
-class BoxList:
+class BoxList():
 
     def __init__(self, gap_num, gap_offset, box_vector, camera):
         
