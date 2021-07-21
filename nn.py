@@ -18,11 +18,7 @@ class NeuralNetwork():
         z = 1/(1 + np.exp(-x))
         # x = np.maximum(0, x)
         return z
-        # return np.maximum(x, 0)
-        # for i in range(x.shape[0]):
-        #     for j in range(x.shape[1]):
-        #         x[i][j] = max(0, x)
-        # return x
+
 
     def forward(self, x):
         self.hidden_layer = self.activation((self.w0 @ x) + self.b0)

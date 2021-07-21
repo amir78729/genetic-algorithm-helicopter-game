@@ -4,6 +4,7 @@ from config import CONFIG
 import random
 import copy
 import csv
+import math
 
 
 class Evolution:
@@ -65,12 +66,12 @@ class Evolution:
             selected_players.append(players[i - 1])
         return selected_players
 
+
     def generate_new_population(self, num_players, prev_players=None):
         print('Generating New Population')
         # in first generation, we create random players
         if prev_players is None:
             return [Player(self.mode) for _ in range(num_players)]
-
 
         else:
             # num_players example: 150
@@ -90,29 +91,27 @@ class Evolution:
 
             # TODO (additional): a selection method other than `fitness proportionate`
 
-            # roulette wheel method
-            new_players = []
-            count = 0
-            while count < num_players:
-                p = self.roulette_wheel(prev_players)
-                child = copy.deepcopy(p)
-                self.mutate(child)
-                new_players.append(child)
-                count += 1
-            return new_players
-
-            # # sus method
+            # # roulette wheel method
             # new_players = []
-            # candidates = self.sus(prev_players, num_players)
-            # for c in candidates:
-            #     child = copy.deepcopy(c)
+            # count = 0
+            # while count < num_players:
+            #     p = self.roulette_wheel(prev_players)
+            #     child = copy.deepcopy(p)
             #     self.mutate(child)
             #     new_players.append(child)
+            #     count += 1
             # return new_players
 
+            # sus method
+            new_players = []
+            candidates = self.sus(prev_players, num_players)
+            for c in candidates:
+                child = copy.deepcopy(c)
+                self.mutate(child)
+                new_players.append(child)
+            return new_players
+
             # TODO (additional): implementing crossover
-
-
 
     def next_population_selection(self, players, num_players):
         # num_players example: 100

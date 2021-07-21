@@ -1,5 +1,7 @@
+import math
 import pygame
 import numpy as np
+import random
 
 from nn import NeuralNetwork
 from config import CONFIG
@@ -99,65 +101,101 @@ class Player():
         return layer_sizes
 
     def think(self, mode, box_lists, agent_position, velocity):
-        # if len(box_lists):
-        #     x_b = box_lists[0].x
-        #     y_b = box_lists[0].gap_mid
-        #     up = y_b + box_lists[0].gap_offset
-        #     down = y_b + box_lists[0].gap_offset
-        # else:
-        #     x_b = CONFIG['WIDTH']
-        #     y_b = CONFIG['HEIGHT'] / 2
-        #     up = y_b + 30
-        #     down = y_b - 30
-        # x1 = agent_position[0] - x_b
-        # y1 = agent_position[1] - y_b
-        # 
-        # x2 = agent_position[0] - down
-        # y2 = agent_position[1] - up
-        # y = ((agent_position[0] - x_b) ** 2 + (agent_position[1] - y_b) ** 2) ** 0.5
-        # vector = [y2, y1, y, x2, x1, velocity]
-        # input_layer = [abs(i) for i in vector]
-        # m = max(input_layer)
-        # # input_layer = [i/m for i in input_layer]
-        # # print(input_layer)
-        # self.nn.forward(input_layer)
-        # 
-        # if self.nn.output_layer[0][0] > 0.5:
-        #     direction = 1
-        # else:
-        #     direction = -1
-
-        if len(box_lists):
-            x_b = box_lists[0].x
-            y_b = box_lists[0].gap_mid
-            dist = 120
-        else:
-            x_b = CONFIG['WIDTH']
-            y_b = CONFIG['HEIGHT'] / 2
-            dist = 120
-
-        dist_up = CONFIG['HEIGHT'] - agent_position[1]
-        dist_down = agent_position[1]
-        up_gap = abs(agent_position[1] - dist - y_b)
-        down_gap = abs(agent_position[1] + dist - y_b)
-        edist = ((agent_position[0] - x_b) ** 2 + (agent_position[1] - y_b) ** 2) ** 0.5
-
-        vector = [dist_up/1000, up_gap/1000, edist/1000, down_gap/1000, dist_down/1000, velocity/10]
-
-        self.nn.forward(vector)
-
-        if self.nn.output_layer[0][0] > 0.5:
-            direction = 1
-        else:
-            direction = -1
         # TODO
         # mode example: 'helicopter'
         # box_lists: an array of `BoxList` objects
         # agent_position example: [600, 250]
         # velocity example: 7
 
-        # direction = -1
-        return direction
+        if mode in ['helicopter', 'gravity']:
+            if len(box_lists):
+                target_position = [box_lists[0].x, box_lists[0].gap_mid]
+            else:
+                target_position = [CONFIG['WIDTH'], CONFIG['HEIGHT'] / 2]
+            dist = 120
+            dist_up = CONFIG['HEIGHT'] - agent_position[1]
+            dist_down = agent_position[1]
+            up_gap = abs(agent_position[1] - dist - target_position[1])
+            down_gap = abs(agent_position[1] + dist - target_position[1])
+            d_distance = math.sqrt(((agent_position[0] - target_position[0]) ** 2 + (agent_position[1] - target_position[1]) ** 2))
+
+            vector_max = max([dist_up, up_gap, d_distance, down_gap, dist_down, 100 * velocity])
+            vector = [dist_up / vector_max, up_gap / vector_max, d_distance / vector_max, down_gap / vector_max,
+                      dist_down / vector_max, 100 * velocity / vector_max]
+            self.nn.forward(vector)
+            if self.nn.output_layer[0][0] > 0.5:
+                direction = 1
+            else:
+                direction = -1
+            return direction
+            stateVector = np.zeros((6, 1))
+
+            max_dist_x_position = 850
+            max_y_position = CONFIG['HEIGHT']
+            max_velocity = 6
+            if mode == 'thrust':
+                max_velocity = 500
+            max_dist_boxes_position = 500
+            max_gap_mid = 500
+
+            if len(box_lists) > 1:
+                stateVector[0][0] = (agent_position[0] - box_lists[0].x) / max_dist_x_position
+                stateVector[1][0] = agent_position[1] / max_y_position
+                stateVector[2][0] = velocity / max_velocity
+                stateVector[3][0] = (box_lists[1].x - box_lists[0].x) / max_dist_boxes_position
+                stateVector[4][0] = box_lists[0].gap_mid / max_gap_mid
+                stateVector[5][0] = box_lists[1].gap_mid / max_gap_mid
+
+            direction = -1
+            if len(box_lists) > 1:
+                self.nn.forward(stateVector)
+                if mode == 'helicopter':
+                    if self.nn.output_layer[0][0] > 0.5:
+                        direction = 1
+                if mode == 'gravity':
+                    if self.nn.output_layer[0][0] > 0.5:
+                        direction = 1
+                if mode == 'thrust':
+                    if self.nn.output_layer[0][0] > 0.5:
+                        direction = 1
+                    # if yhat <= 0.33:
+                    #     direction = -1
+                    # elif yhat > 0.33 and yhat <= 0.66:
+                    #     direction = 0
+                    # else:
+                    #     direction = 1
+            else:
+                randomNumber = random.random()
+                if randomNumber > 0.5:
+                    direction = 1
+
+            return direction
+
+        if mode == 'thrust':
+            if len(box_lists):
+                target_position = [box_lists[0].x, box_lists[0].gap_mid]
+            else:
+                target_position = [CONFIG['WIDTH'], CONFIG['HEIGHT'] / 2]
+            dist = 120
+            dist_up = CONFIG['HEIGHT'] - agent_position[1]
+            dist_down = agent_position[1]
+            up_gap = abs(agent_position[1] - dist - target_position[1])
+            down_gap = abs(agent_position[1] + dist - target_position[1])
+            d_distance = math.sqrt(((agent_position[0] - target_position[0]) ** 2 + (agent_position[1] - target_position[1]) ** 2))
+
+            vector_max = max([dist_up, up_gap, d_distance, down_gap, dist_down, 100 * velocity])
+            vector = [dist_up / vector_max, up_gap / vector_max, d_distance / vector_max, down_gap / vector_max,
+                      dist_down / vector_max, 100 * velocity / vector_max]
+            self.nn.forward(vector)
+            if self.nn.output_layer[0][0] < 0.3:
+                direction = -1
+            elif self.nn.output_layer[0][0] < 0.7:
+                direction = 0
+            else:
+                direction = 1
+            return direction
+
+
 
     def collision_detection(self, mode, box_lists, camera):
         if mode == 'helicopter':
